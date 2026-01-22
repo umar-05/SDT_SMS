@@ -36,6 +36,7 @@ Route::middleware(['auth', 'role:lecturer'])->prefix('lecturer')->group(function
 Route::middleware(['auth', 'role:student'])->prefix('student')->group(function () {
     Route::get('/dashboard', [StudentController::class, 'index'])->name('student.dashboard');
     Route::get('/register', [RegistrationController::class, 'create'])->name('student.register');
+    Route::delete('/register/{id}', [RegistrationController::class, 'destroy'])->name('student.register.destroy');
     Route::post('/register', [RegistrationController::class, 'store']);
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
 });
