@@ -37,8 +37,27 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->group(function (
     Route::get('/dashboard', [StudentController::class, 'index'])->name('student.dashboard');
     Route::get('/register', [RegistrationController::class, 'create'])->name('student.register');
     Route::delete('/register/{id}', [RegistrationController::class, 'destroy'])->name('student.register.destroy');
-    Route::post('/register', [RegistrationController::class, 'store']);
+    Route::post('/register', [RegistrationController::class, 'store'])->name('student.register.store');;
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    // Search Courses (AJAX endpoint)
+    Route::get('/student/courses/search', [StudentController::class, 'searchCourses'])
+        ->name('student.courses.search');
+
+    // Update Registration (Modify)
+    Route::put('/student/registrations/{id}', [StudentController::class, 'updateRegistration'])
+        ->name('student.registration.update');
+
+    // Update Profile
+    Route::put('/student/profile', [StudentController::class, 'updateProfile'])
+        ->name('student.profile.update');
+
+    // View enrolled courses (list view)
+    Route::get('/student/courses', [StudentController::class, 'viewCourses'])
+        ->name('student.courses.index');
+
+    // View single course details
+    Route::get('/student/courses/{id}', [StudentController::class, 'courseDetails'])
+        ->name('student.courses.show');
 });
 
 require __DIR__.'/auth.php';
