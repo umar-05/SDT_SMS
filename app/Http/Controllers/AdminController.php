@@ -67,6 +67,9 @@ class AdminController extends Controller
             'title' => 'required',
             'description' => 'nullable|string',
             'max_students' => 'required|integer|min:1',
+            // ADD THESE TWO LINES TO FIX THE ERROR
+            'lecturer_id' => 'required|exists:users,id',
+            'semester_id' => 'required|exists:semesters,id',
         ]);
 
         $course->update($request->all());

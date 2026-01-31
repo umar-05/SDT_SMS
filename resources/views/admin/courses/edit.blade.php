@@ -8,41 +8,58 @@
     </div>
 
     <div class="bg-white shadow-sm rounded-lg p-6">
-        <form action="{{ route('admin.courses.update', $course) }}" method="POST">
+        <form action="{{ route('admin.courses.update', $course->id) }}" method="POST">
             @csrf
             @method('PUT')
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700">Course Code</label>
-                <input type="text" name="course_code" value="{{ $course->course_code }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                <input type="text" name="course_code" value="{{ old('course_code', $course->course_code) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                <x-input-error :messages="$errors->get('course_code')" class="mt-2" />
             </div>
 
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700">Course Title</label>
-                <input type="text" name="title" value="{{ $course->title }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                <input type="text" name="title" value="{{ old('title', $course->title) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                <x-input-error :messages="$errors->get('title')" class="mt-2" />
             </div>
 
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700">Description</label>
-                <textarea name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ $course->description }}</textarea>
+                <textarea name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description', $course->description) }}</textarea>
+                <x-input-error :messages="$errors->get('description')" class="mt-2" />
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Max Students</label>
+                <input type="number" name="max_students" value="{{ old('max_students', $course->max_students) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required min="1">
+                <x-input-error :messages="$errors->get('max_students')" class="mt-2" />
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Assign Lecturer</label>
                     <select name="lecturer_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Select Lecturer</option>
                         @foreach($lecturers as $lecturer)
-                            <option value="{{ $lecturer->id }}" {{ $course->lecturer_id == $lecturer->id ? 'selected' : '' }}>{{ $lecturer->name }}</option>
+                            <option value="{{ $lecturer->id }}" {{ (old('lecturer_id', $course->lecturer_id) == $lecturer->id) ? 'selected' : '' }}>
+                                {{ $lecturer->name }}
+                            </option>
                         @endforeach
                     </select>
+                    <x-input-error :messages="$errors->get('lecturer_id')" class="mt-2" />
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Semester</label>
                     <select name="semester_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         @foreach($semesters as $semester)
-                            <option value="{{ $semester->id }}" {{ $course->semester_id == $semester->id ? 'selected' : '' }}>{{ $semester->name }}</option>
+                            <option value="{{ $semester->id }}" {{ (old('semester_id', $course->semester_id) == $semester->id) ? 'selected' : '' }}>
+                                {{ $semester->name }}
+                            </option>
                         @endforeach
                     </select>
+                    <x-input-error :messages="$errors->get('semester_id')" class="mt-2" />
                 </div>
             </div>
 

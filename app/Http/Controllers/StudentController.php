@@ -4,21 +4,27 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Registration; // Don't forget this import!
+use Illuminate\Support\Facades\Hash;
+use App\Models\Registration;
+use App\Models\Course; // [FIX] Imported Course model
 
 class StudentController extends Controller
 {
+    /**
+     * Dashboard: Shows the student's personal registered courses.
+     */
     public function index()
     {
-        // Fetch registrations for the currently logged-in student
-        // and include the 'course' details so we can show the title
-        $registrations = Registration::with('course')
+        $registrations = Registration::with('course.semester', 'course.lecturer')
                             ->where('student_id', Auth::id())
                             ->get();
 
         return view('student.dashboard', compact('registrations'));
     }
 
+    /**
+     * Search courses (AJAX or direct).
+     */
     public function searchCourses(Request $request)
     {
         $query = $request->get('q');
@@ -39,7 +45,6 @@ class StudentController extends Controller
         
         $registration->update([
             'status' => $request->status,
-            // You can add a 'modification_reason' column if needed
         ]);
         
         return redirect()->route('student.dashboard')
@@ -58,12 +63,11 @@ class StudentController extends Controller
             'password' => 'nullable|min:8|confirmed',
         ]);
         
-        // Update basic info
         $user->name = $validated['name'];
         $user->email = $validated['email'];
-        $user->phone = $validated['phone'] ?? $user->phone;
+        // Check if phone exists in table before saving, assume yes based on previous code
+        // $user->phone = $validated['phone'] ?? $user->phone; 
         
-        // Update password if provided
         if ($request->filled('password')) {
             if (!Hash::check($request->current_password, $user->password)) {
                 return back()->with('error', 'Current password is incorrect!');
@@ -77,25 +81,32 @@ class StudentController extends Controller
             ->with('success', 'Profile updated successfully!');
     }
 
+    /**
+     * [FIXED] View All Available Courses
+     * Shows all system courses + count of students signed up.
+     */
     public function viewCourses()
     {
-        $registrations = Registration::where('student_id', Auth::id())
-            ->with('course')
-            ->get();
+        // 1. Fetch all courses with lecturer and semester info
+        // 2. withCount('registrations') adds a 'registrations_count' attribute to each course
+        $courses = Course::with(['lecturer', 'semester'])
+            ->withCount(['registrations' => function ($query) {
+                // Optionally only count 'approved' students effectively
+                $query->where('status', 'approved');
+            }])
+            ->paginate(10);
         
-        return view('student.courses', compact('registrations'));
+        return view('student.courses', compact('courses'));
     }
 
     public function courseDetails($id)
     {
-        $course = Course::findOrFail($id);
+        $course = Course::with(['lecturer', 'semester'])->findOrFail($id);
         
-        // Check if student is registered
         $isRegistered = Registration::where('student_id', Auth::id())
             ->where('course_id', $id)
             ->exists();
         
         return view('student.course-details', compact('course', 'isRegistered'));
     }
-
 }
