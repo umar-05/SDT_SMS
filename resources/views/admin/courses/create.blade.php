@@ -26,6 +26,11 @@
                 <textarea name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
             </div>
 
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Max Students</label>
+                <input type="number" name="max_students" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required min="1">
+            </div>
+
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Assign Lecturer</label>

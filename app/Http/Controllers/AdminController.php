@@ -20,7 +20,15 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('totalStudents', 'totalLecturers', 'totalCourses'));
     }
 
-    // --- 2. Add Course ---
+    // --- 2. Course Management ---
+
+    // [FIX] This function was missing, causing the white screen on the course list page
+    public function coursesList()
+    {
+        $courses = Course::with(['lecturer', 'semester'])->paginate(10);
+        return view('admin.courses.index', compact('courses'));
+    }
+
     public function createCourse()
     {
         $lecturers = User::where('role', 'lecturer')->get();
@@ -30,9 +38,12 @@ class AdminController extends Controller
 
     public function storeCourse(Request $request)
     {
+        // [FIX] Added max_students to validation to solve the "Default value" error
         $request->validate([
             'course_code' => 'required|unique:courses',
             'title' => 'required',
+            'description' => 'nullable|string',
+            'max_students' => 'required|integer|min:1',
             'lecturer_id' => 'required|exists:users,id',
             'semester_id' => 'required|exists:semesters,id',
         ]);
@@ -42,7 +53,6 @@ class AdminController extends Controller
         return redirect()->route('admin.courses.index')->with('success', 'Course added successfully.');
     }
 
-    // --- 3. Modify Course (Extends: Delete Course) ---
     public function editCourse(Course $course)
     {
         $lecturers = User::where('role', 'lecturer')->get();
@@ -55,6 +65,8 @@ class AdminController extends Controller
         $request->validate([
             'course_code' => 'required|unique:courses,course_code,'.$course->id,
             'title' => 'required',
+            'description' => 'nullable|string',
+            'max_students' => 'required|integer|min:1',
         ]);
 
         $course->update($request->all());
@@ -68,11 +80,9 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Course deleted successfully.');
     }
 
-    // --- 4. Amend Registration ---
-    // View registrations for a specific course to add/remove students
+    // --- 3. Amend Registration (Add/Remove students) ---
     public function manageRegistrations(Course $course)
     {
-        // Get students NOT currently registered in this course
         $enrolledStudentIds = $course->registrations()->pluck('student_id');
         $availableStudents = User::where('role', 'student')
                                 ->whereNotIn('id', $enrolledStudentIds)
