@@ -24,15 +24,19 @@ Route::middleware('auth')->group(function () {
 });
 
 // IT STAFF ROUTES
-Route::middleware(['auth', 'role:it_staff'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-    Route::resource('courses', CourseController::class); // Add/Edit/Delete Courses
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/users', [AdminController::class, 'usersList'])->name('users.index');
+    Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
+    Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
+    Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
 });
 
 // LECTURER ROUTES
-Route::middleware(['auth', 'role:lecturer'])->prefix('lecturer')->group(function () {
-    Route::get('/courses', [LecturerController::class, 'assignedCourses'])->name('lecturer.courses');
-    Route::get('/courses/{course}/students', [LecturerController::class, 'studentList']);
+Route::middleware(['auth', 'role:lecturer'])->prefix('lecturer')->name('lecturer.')->group(function () {
+    Route::get('/dashboard', [LecturerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/course/{id}', [LecturerController::class, 'showCourse'])->name('course.show');
+    Route::post('/grade/{id}', [LecturerController::class, 'updateGrade'])->name('grade.update');
 });
 
 // STUDENT ROUTES

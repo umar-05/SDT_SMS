@@ -2,23 +2,100 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Course;
+use App\Models\Semester;
 use App\Models\Registration;
+use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    public function index()
+    // --- 1. View Dashboard ---
+    public function dashboard()
     {
-        // Gather stats for the admin dashboard
-        $stats = [
-            'total_students' => User::where('role', 'student')->count(),
-            'total_lecturers' => User::where('role', 'lecturer')->count(),
-            'total_courses' => Course::count(),
-            'pending_registrations' => Registration::where('status', 'pending')->count(),
-        ];
+        $totalStudents = User::where('role', 'student')->count();
+        $totalLecturers = User::where('role', 'lecturer')->count();
+        $totalCourses = Course::count();
+        
+        return view('admin.dashboard', compact('totalStudents', 'totalLecturers', 'totalCourses'));
+    }
 
-        return view('admin.dashboard', compact('stats'));
+    // --- 2. Add Course ---
+    public function createCourse()
+    {
+        $lecturers = User::where('role', 'lecturer')->get();
+        $semesters = Semester::all();
+        return view('admin.courses.create', compact('lecturers', 'semesters'));
+    }
+
+    public function storeCourse(Request $request)
+    {
+        $request->validate([
+            'course_code' => 'required|unique:courses',
+            'title' => 'required',
+            'lecturer_id' => 'required|exists:users,id',
+            'semester_id' => 'required|exists:semesters,id',
+        ]);
+
+        Course::create($request->all());
+
+        return redirect()->route('admin.courses.index')->with('success', 'Course added successfully.');
+    }
+
+    // --- 3. Modify Course (Extends: Delete Course) ---
+    public function editCourse(Course $course)
+    {
+        $lecturers = User::where('role', 'lecturer')->get();
+        $semesters = Semester::all();
+        return view('admin.courses.edit', compact('course', 'lecturers', 'semesters'));
+    }
+
+    public function updateCourse(Request $request, Course $course)
+    {
+        $request->validate([
+            'course_code' => 'required|unique:courses,course_code,'.$course->id,
+            'title' => 'required',
+        ]);
+
+        $course->update($request->all());
+
+        return redirect()->route('admin.courses.index')->with('success', 'Course modified successfully.');
+    }
+
+    public function destroyCourse(Course $course)
+    {
+        $course->delete();
+        return redirect()->back()->with('success', 'Course deleted successfully.');
+    }
+
+    // --- 4. Amend Registration ---
+    // View registrations for a specific course to add/remove students
+    public function manageRegistrations(Course $course)
+    {
+        // Get students NOT currently registered in this course
+        $enrolledStudentIds = $course->registrations()->pluck('student_id');
+        $availableStudents = User::where('role', 'student')
+                                ->whereNotIn('id', $enrolledStudentIds)
+                                ->get();
+                                
+        return view('admin.registrations.manage', compact('course', 'availableStudents'));
+    }
+
+    public function storeRegistration(Request $request, Course $course)
+    {
+        $request->validate(['student_id' => 'required|exists:users,id']);
+
+        Registration::create([
+            'course_id' => $course->id,
+            'student_id' => $request->student_id
+        ]);
+
+        return redirect()->back()->with('success', 'Student added to course.');
+    }
+
+    public function destroyRegistration(Registration $registration)
+    {
+        $registration->delete();
+        return redirect()->back()->with('success', 'Registration removed.');
     }
 }

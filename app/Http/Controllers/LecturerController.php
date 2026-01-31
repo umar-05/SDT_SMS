@@ -3,43 +3,58 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\User;
 use App\Models\Registration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class LecturerController extends Controller
 {
-    /**
-     * View courses assigned to the lecturer.
-     */
-    public function assignedCourses()
+    // --- 1. View Assigned Courses ---
+    public function dashboard()
     {
-        // NOTE: This assumes you have a 'lecturer_id' on your courses table.
-        // If not, you might need to show all courses or add that column.
-        $courses = Course::where('lecturer_id', Auth::id())->get();
-        
-        // Fallback: If no lecturer assignment exists in DB yet, verify using all()
-        // $courses = Course::all(); 
+        // Only courses assigned to this lecturer
+        $courses = Course::where('lecturer_id', Auth::id())
+                        ->with('semester')
+                        ->get();
 
-        return view('lecturer.courses', compact('courses'));
+        return view('lecturer.dashboard', compact('courses'));
     }
 
-    /**
-     * View students registered for a specific course.
-     */
-    public function studentList(Course $course)
+    // --- 2. View Course Details & View Student List ---
+    public function showCourse(Course $course)
     {
-        // Ensure the lecturer is allowed to view this course
+        // Security Check: Does this course belong to the lecturer?
         if ($course->lecturer_id !== Auth::id()) {
-           // abort(403, 'Unauthorized action.'); // Uncomment if strict checking is needed
+            abort(403, 'Unauthorized');
         }
 
-        // Get registrations with student info
-        $registrations = Registration::with('student')
-            ->where('course_id', $course->id)
-            ->where('status', 'approved') // Only show approved students?
-            ->get();
+        // Eager load registrations and the student data associated with them
+        $course->load('registrations.student');
 
-        return view('lecturer.student-list', compact('course', 'registrations'));
+        return view('lecturer.course-details', compact('course'));
+    }
+
+    // --- 3. View Student Details ---
+    public function showStudent(Course $course, User $student)
+    {
+        // Security Check: Verify lecturer owns the course AND student is in the course
+        if ($course->lecturer_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Check if student is actually enrolled in this course
+        $isEnrolled = Registration::where('course_id', $course->id)
+                                ->where('student_id', $student->id)
+                                ->exists();
+
+        if (!$isEnrolled) {
+            abort(404, 'Student not enrolled in this course.');
+        }
+
+        // Load profile or other academic history if needed
+        $student->load('profile'); 
+
+        return view('lecturer.student-details', compact('course', 'student'));
     }
 }
