@@ -39,11 +39,7 @@
                             
                             <div class="flex items-center justify-between mt-4 border-t pt-4">
                                 <span class="text-xs text-gray-400">Grade: <strong class="text-gray-800">{{ $reg->grade ?? 'N/A' }}</strong></span>
-                                <form action="{{ route('student.register.destroy', $reg->id) }}" method="POST" onsubmit="return confirm('Drop this course?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-xs text-red-600 hover:text-red-900 font-medium">Drop Course</button>
-                                </form>
+                                <a href="{{ route('student.courses.show', $reg->course->id) }}" class="text-xs text-blue-600 hover:text-blue-900 font-medium">View Details</a>
                             </div>
                         </div>
                     @endforeach
