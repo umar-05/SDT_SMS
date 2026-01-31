@@ -15,11 +15,24 @@ class StudentController extends Controller
      */
     public function index()
     {
-        $registrations = Registration::with('course.semester', 'course.lecturer')
-                            ->where('student_id', Auth::id())
-                            ->get();
+        $studentId = Auth::id();
 
-        return view('student.dashboard', compact('registrations'));
+        // 1. Fetch registrations with Course, Semester, and Lecturer
+        $registrations = Registration::with(['course.semester', 'course.lecturer'])
+                            ->where('student_id', $studentId)
+                            ->get()
+                            ->sortByDesc(function ($registration) {
+                                // Sort so latest semesters appear first
+                                return $registration->course->semester->id ?? 0;
+                            });
+
+        // 2. Group them by Semester Name (Required for Req 5b)
+        $groupedCourses = $registrations->groupBy(function ($registration) {
+            return $registration->course->semester->name ?? 'Unknown Semester';
+        });
+
+        // 3. Return the view with the CORRECT variable ($groupedCourses)
+        return view('student.dashboard', compact('groupedCourses'));
     }
 
     /**

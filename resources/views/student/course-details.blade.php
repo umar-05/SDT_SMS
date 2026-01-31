@@ -2,12 +2,8 @@
 
 @section('content')
 <div class="min-h-screen bg-gray-50 flex flex-col">
-
-
     <div class="flex flex-1">
-
         <main class="flex-1 p-8">
-            <!-- Breadcrumb -->
             <nav class="flex mb-6" aria-label="Breadcrumb">
                 <ol class="inline-flex items-center space-x-1 md:space-x-3">
                     <li class="inline-flex items-center">
@@ -21,7 +17,7 @@
                                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                             </svg>
                             <a href="{{ route('student.courses.index') }}" class="ml-1 text-gray-600 hover:text-gray-900">
-                                My Courses
+                                Course Catalog
                             </a>
                         </div>
                     </li>
@@ -30,19 +26,21 @@
                             <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                             </svg>
-                            <span class="ml-1 text-gray-500">Course Details</span>
+                            <span class="ml-1 text-gray-500">{{ $course->course_code }}</span>
                         </div>
                     </li>
                 </ol>
             </nav>
 
-            <!-- Course Header -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-6">
-                <div class="flex items-start justify-between">
+                <div class="flex flex-col md:flex-row items-start justify-between gap-4">
                     <div class="flex-1">
                         <div class="flex items-center gap-3 mb-2">
                             <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full">
                                 {{ $course->course_code }}
+                            </span>
+                            <span class="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-semibold rounded-full">
+                                {{ $course->semester->name ?? 'Semester TBA' }}
                             </span>
                             @if($isRegistered)
                                 <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-semibold rounded-full">
@@ -52,167 +50,80 @@
                         </div>
                         <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ $course->title }}</h1>
                         
-                        @if($course->description)
-                            <p class="text-gray-600 leading-relaxed">{{ $course->description }}</p>
-                        @endif
+                        <p class="text-gray-600 leading-relaxed text-lg">
+                            {{ $course->description ?? 'No detailed description available for this course.' }}
+                        </p>
                     </div>
-                    
-                    @if(!$isRegistered)
-                        <a href="{{ route('student.register') }}?course={{ $course->id }}" 
-                            class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium whitespace-nowrap">
-                            Register for this Course
-                        </a>
-                    @endif
                 </div>
             </div>
 
-            <!-- Course Details Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Main Content -->
                 <div class="lg:col-span-2 space-y-6">
-                    <!-- Course Information -->
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-4">Course Information</h2>
+                        <h2 class="text-xl font-semibold text-gray-900 mb-4">Instructor Information</h2>
                         
-                        <div class="space-y-4">
-                            @if($course->prerequisites)
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Prerequisites</h3>
-                                <p class="text-gray-600">{{ $course->prerequisites }}</p>
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-xl font-bold text-blue-600">
+                                {{ substr($course->lecturer->name ?? '?', 0, 1) }}
                             </div>
-                            @endif
-
-                            @if($course->learning_outcomes)
                             <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Learning Outcomes</h3>
-                                <p class="text-gray-600">{{ $course->learning_outcomes }}</p>
+                                <p class="text-lg font-bold text-gray-900">{{ $course->lecturer->name ?? 'To Be Assigned' }}</p>
+                                <p class="text-gray-600">{{ $course->lecturer->email ?? '' }}</p>
+                                <p class="text-sm text-gray-500 mt-1">Lecturer</p>
                             </div>
-                            @endif
-
-                            @if($course->assessment_methods)
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Assessment Methods</h3>
-                                <p class="text-gray-600">{{ $course->assessment_methods }}</p>
-                            </div>
-                            @endif
-
-                            @if($course->textbooks)
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Recommended Textbooks</h3>
-                                <p class="text-gray-600">{{ $course->textbooks }}</p>
-                            </div>
-                            @endif
                         </div>
                     </div>
-
-                    <!-- Course Schedule (if available) -->
-                    @if($course->schedule)
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-4">Schedule</h2>
-                        <div class="space-y-3">
-                            @foreach(json_decode($course->schedule, true) ?? [] as $schedule)
-                            <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ $schedule['day'] ?? 'TBA' }}</p>
-                                    <p class="text-sm text-gray-600">{{ $schedule['time'] ?? 'Time TBA' }} - {{ $schedule['location'] ?? 'Location TBA' }}</p>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
                 </div>
 
-                <!-- Sidebar -->
                 <div class="space-y-6">
-                    <!-- Course Stats -->
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Course Details</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Registration</h2>
                         
-                        <div class="space-y-4">
-                            @if($course->credits)
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-600">Credits</span>
-                                <span class="font-semibold text-gray-900">{{ $course->credits }}</span>
-                            </div>
-                            @endif
+                        @php
+                            $registrationsCount = $course->registrations()->where('status', 'approved')->count();
+                            $spotsLeft = $course->max_students - $registrationsCount;
+                            $isFull = $spotsLeft <= 0;
+                        @endphp
 
-                            @if($course->level)
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-600">Level</span>
-                                <span class="font-semibold text-gray-900">{{ $course->level }}</span>
+                        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-gray-600">Availability</span>
+                                <span class="font-bold {{ $isFull ? 'text-red-600' : 'text-green-600' }}">
+                                    {{ $isFull ? 'Full' : 'Open' }}
+                                </span>
                             </div>
-                            @endif
-
-                            @if($course->department)
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-600">Department</span>
-                                <span class="font-semibold text-gray-900">{{ $course->department }}</span>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ min(100, ($registrationsCount / $course->max_students) * 100) }}%"></div>
                             </div>
-                            @endif
-
-                            @if($course->semester)
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-600">Semester</span>
-                                <span class="font-semibold text-gray-900">{{ $course->semester }}</span>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <!-- Instructor Info -->
-                    @if($course->instructor_name)
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Instructor</h2>
-                        
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="font-semibold text-gray-900">{{ $course->instructor_name }}</p>
-                                @if($course->instructor_email)
-                                <a href="mailto:{{ $course->instructor_email }}" class="text-sm text-blue-600 hover:underline">
-                                    {{ $course->instructor_email }}
-                                </a>
-                                @endif
-                            </div>
+                            <p class="text-xs text-gray-500 mt-2 text-right">
+                                {{ $registrationsCount }} / {{ $course->max_students }} enrolled
+                            </p>
                         </div>
 
-                        @if($course->instructor_office)
-                        <div class="mt-3 pt-3 border-t border-gray-100">
-                            <p class="text-sm text-gray-600">Office: {{ $course->instructor_office }}</p>
-                        </div>
-                        @endif
-
-                        @if($course->instructor_hours)
-                        <div class="mt-2">
-                            <p class="text-sm text-gray-600">Office Hours: {{ $course->instructor_hours }}</p>
-                        </div>
-                        @endif
-                    </div>
-                    @endif
-
-                    <!-- Quick Actions -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-                        
-                        <div class="space-y-2">
+                        <div class="space-y-3">
                             @if(!$isRegistered)
-                                <a href="{{ route('student.register') }}?course={{ $course->id }}" 
-                                    class="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 font-medium">
-                                    Register for Course
-                                </a>
+                                @if(!$isFull)
+                                    <form action="{{ route('student.register.store') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="course_id" value="{{ $course->id }}">
+                                        <button type="submit" class="block w-full px-4 py-3 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 font-bold transition shadow-md">
+                                            Register Now
+                                        </button>
+                                    </form>
+                                @else
+                                    <button disabled class="block w-full px-4 py-3 bg-gray-300 text-gray-500 text-center rounded-lg font-bold cursor-not-allowed">
+                                        Course Full
+                                    </button>
+                                @endif
+                            @else
+                                <div class="block w-full px-4 py-3 bg-green-100 text-green-700 text-center rounded-lg font-bold border border-green-200">
+                                    You are Enrolled
+                                </div>
                             @endif
                             
                             <a href="{{ route('student.courses.index') }}" 
-                                class="block w-full px-4 py-2 bg-gray-100 text-gray-700 text-center rounded-lg hover:bg-gray-200 font-medium">
-                                Back to My Courses
+                                class="block w-full px-4 py-3 bg-white border border-gray-300 text-gray-700 text-center rounded-lg hover:bg-gray-50 font-medium transition">
+                                Back to Catalog
                             </a>
                         </div>
                     </div>
