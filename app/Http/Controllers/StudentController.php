@@ -71,15 +71,16 @@ class StudentController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
+            // Match these keys to your HTML input 'name' attributes
+            'phone_number' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
             'current_password' => 'nullable|required_with:password',
             'password' => 'nullable|min:8|confirmed',
         ]);
         
+        // 1. Update basic User info
         $user->name = $validated['name'];
         $user->email = $validated['email'];
-        // Check if phone exists in table before saving, assume yes based on previous code
-        // $user->phone = $validated['phone'] ?? $user->phone; 
         
         if ($request->filled('password')) {
             if (!Hash::check($request->current_password, $user->password)) {
@@ -89,6 +90,15 @@ class StudentController extends Controller
         }
         
         $user->save();
+
+        // 2. Update or Create the related Profile record
+        $user->profile()->updateOrCreate(
+            ['user_id' => $user->id], // Search criteria
+            [
+                'phone_number' => $validated['phone_number'], // Database column
+                'address' => $validated['address'],           // Database column
+            ]
+        );
         
         return redirect()->route('student.dashboard')
             ->with('success', 'Profile updated successfully!');
