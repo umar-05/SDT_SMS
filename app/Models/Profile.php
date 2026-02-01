@@ -18,6 +18,8 @@ class Profile extends Model
         'user_id',
         'phone_number',
         'address',
+        'matric_number',
+        'programme',
     ];
 
     /**

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('title')->unique();
             $table->string('description');
             $table->integer('max_students');
+            $table->integer('credit_hours')->nullable();
             $table->foreignId('lecturer_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('semester_id')->constrained('semesters')->onDelete('cascade');
             $table->timestamps();

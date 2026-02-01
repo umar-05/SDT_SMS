@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto">
-    <!-- Welcome Header with Animation -->
     <div class="mb-8 fade-in">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ Auth::user()->name }}! 👋</h1>
         <p class="text-gray-600">Here's what's happening with your courses today.</p>
@@ -13,9 +12,7 @@
         $allRegistrations = $groupedCourses->flatten(1);
     @endphp
 
-    <!-- Quick Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <!-- Enrolled Courses -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="stat-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white fade-in">
             <div class="flex items-center justify-between">
                 <div>
@@ -30,7 +27,6 @@
             </div>
         </div>
 
-        <!-- Pending Approvals -->
         <div class="stat-card bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl shadow-lg p-6 text-white fade-in-delay-1">
             <div class="flex items-center justify-between">
                 <div>
@@ -45,12 +41,15 @@
             </div>
         </div>
 
-        <!-- Total Credits -->
         <div class="stat-card bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white fade-in-delay-2">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-purple-100 text-sm font-medium mb-1">Credit Hours</p>
-                    <h3 class="text-3xl font-bold">{{ $allRegistrations->where('status', 'approved')->sum(function($reg) { return $reg->course->credit_hours ?? 0; }) }}</h3>
+                    <p class="text-purple-100 text-sm font-medium mb-1">Total Credit Hours</p>
+                    <h3 class="text-3xl font-bold">
+                        {{ $allRegistrations->where('status', 'approved')->sum(function($reg) { 
+                            return (int) ($reg->course->credit_hours ?? 0); 
+                        }) }}
+                    </h3>
                 </div>
                 <div class="bg-white bg-opacity-20 rounded-full p-3">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,24 +58,8 @@
                 </div>
             </div>
         </div>
-
-        <!-- Rejected -->
-        <div class="stat-card bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white fade-in-delay-3">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-red-100 text-sm font-medium mb-1">Rejected</p>
-                    <h3 class="text-3xl font-bold">{{ $allRegistrations->where('status', 'rejected')->count() }}</h3>
-                </div>
-                <div class="bg-white bg-opacity-20 rounded-full p-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <button onclick="showSearchModal()" 
                 class="btn-primary bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg p-6 text-left transform hover:scale-105 transition-all fade-in">
@@ -127,7 +110,6 @@
         </a>
     </div>
 
-    <!-- My Courses Section - Grouped by Semester -->
     @if($groupedCourses->isEmpty())
         <div class="bg-white rounded-xl shadow-lg p-6 fade-in-delay-3">
             <div class="text-center py-16">
@@ -143,7 +125,6 @@
             </div>
         </div>
     @else
-        <!-- Display courses grouped by semester -->
         @foreach($groupedCourses as $semesterName => $registrations)
             <div class="bg-white rounded-xl shadow-lg p-6 mb-8 fade-in-delay-3">
                 <div class="flex items-center justify-between mb-6">
@@ -156,7 +137,6 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($registrations as $registration)
                         <div class="course-card bg-white border-2 border-gray-100 rounded-xl overflow-hidden hover:border-blue-300 transition-all">
-                            <!-- Course Header -->
                             <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-5 border-b border-gray-100">
                                 <div class="flex items-start justify-between mb-3">
                                     <span class="inline-block bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
@@ -176,19 +156,11 @@
                                             </svg>
                                             Pending
                                         </span>
-                                    @else
-                                        <span class="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full flex items-center">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                            </svg>
-                                            {{ ucfirst($registration->status) }}
-                                        </span>
                                     @endif
                                 </div>
                                 <h3 class="text-lg font-bold text-gray-900 leading-tight">{{ $registration->course->title }}</h3>
                             </div>
 
-                            <!-- Course Body -->
                             <div class="p-5">
                                 <div class="space-y-3 mb-4">
                                     <div class="flex items-center text-sm text-gray-600">
@@ -217,7 +189,6 @@
         @endforeach
     @endif
 
-    <!-- Pending Registrations Alert -->
     @if($allRegistrations->where('status', 'pending')->isNotEmpty())
         <div class="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-6 fade-in-delay-3">
             <div class="flex items-start">

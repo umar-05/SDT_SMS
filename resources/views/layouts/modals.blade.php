@@ -100,7 +100,18 @@
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Phone Number</label>
-                                    <input type="text" name="phone_number" value="{{ auth()->user()->phone_number ?? '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Optional">
+                                    <input type="text" name="phone_number" value="{{ isset(auth()->user()->profile) && auth()->user()->profile->phone_number ? auth()->user()->profile->phone_number : 'N/A' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Optional">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">
+                                        {{ auth()->user()->role === 'lecturer' ? 'Office Address' : 'Residential Address' }}
+                                    </label>
+                                    <input type="text" 
+                                        name="address" 
+                                        value="{{ auth()->user()->profile->address ?? '' }}" 
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+                                        placeholder="Enter your full address">
                                 </div>
 
                                 <hr class="my-4 border-gray-200">

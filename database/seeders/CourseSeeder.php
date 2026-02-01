@@ -31,6 +31,7 @@ class CourseSeeder extends Seeder
                 'description' => 'A course on building modern web applications using MVC frameworks like Laravel.',
                 'max_students' => 30,
                 'semester_id' => $sem1,
+                'credit_hours'=> 3, 
             ],
             [
                 'course_code' => 'SECJ1013',
@@ -38,6 +39,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Introduction to C++ programming, problem-solving, and basic algorithms.',
                 'max_students' => 40,
                 'semester_id' => $sem1,
+                'credit_hours'=> 3, 
             ],
             [
                 'course_code' => 'SECI1013',
@@ -45,6 +47,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Mathematical structures fundamental to computer science: logic, sets, and graph theory.',
                 'max_students' => 35,
                 'semester_id' => $sem1,
+                'credit_hours'=> 3, 
             ],
             [
                 'course_code' => 'SECD2523',
@@ -52,6 +55,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Design and implementation of relational databases, SQL queries, and normalization.',
                 'max_students' => 25,
                 'semester_id' => $sem2,
+                'credit_hours'=> 3, 
             ],
             [
                 'course_code' => 'SECR3213',
@@ -59,6 +63,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Understanding OSI models, TCP/IP protocols, and network routing fundamentals.',
                 'max_students' => 30,
                 'semester_id' => $sem2,
+                'credit_hours'=> 3, 
             ],
             [
                 'course_code' => 'SECV2113',
@@ -66,6 +71,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Study of user interface design, usability testing, and UX principles.',
                 'max_students' => 28,
                 'semester_id' => $sem2,
+                'credit_hours'=> 3, 
             ],
             [
                 'course_code' => 'SECJ3553',
@@ -73,6 +79,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Overview of AI concepts including machine learning, neural networks, and robotics.',
                 'max_students' => 20,
                 'semester_id' => $sem2,
+                'credit_hours'=> 3, 
             ],
             [
                 'course_code' => 'SECP4112',
@@ -80,6 +87,7 @@ class CourseSeeder extends Seeder
                 'description' => 'Research methodology and proposal defense for final year undergraduate projects.',
                 'max_students' => 50,
                 'semester_id' => $sem1,
+                'credit_hours'=> 2, 
             ],
         ];
 

@@ -41,9 +41,24 @@
                         {{ $registration->student->email }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Active
-                        </span>
+                        {{-- [FIX] Dynamic status badges based on database value --}}
+                        @if($registration->status === 'approved')
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Active
+                            </span>
+                        @elseif($registration->status === 'pending')
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                Pending Approval
+                            </span>
+                        @elseif($registration->status === 'waitlist')
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                On Waitlist
+                            </span>
+                        @else
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                {{ ucfirst($registration->status) }}
+                            </span>
+                        @endif
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <a href="{{ route('lecturer.student.show', [$course->id, $registration->student->id]) }}" class="text-blue-600 hover:text-blue-900 font-medium">View Profile</a>

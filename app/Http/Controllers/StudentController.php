@@ -95,8 +95,8 @@ class StudentController extends Controller
         $user->profile()->updateOrCreate(
             ['user_id' => $user->id], // Search criteria
             [
-                'phone_number' => $validated['phone_number'], // Database column
-                'address' => $validated['address'],           // Database column
+                'phone_number' => $validated['phone_number'] ?? null, // Database column
+                'address' => $validated['address'] ?? null,           // Database column
             ]
         );
         
