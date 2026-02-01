@@ -15,14 +15,14 @@ class AdminController extends Controller
     // --- 3. Amend Registration (Add/Remove students) ---
     public function manageRegistrations(Course $course)
     {
-        // [FIX] Eager load students AND their profiles to see Phone/Address in the view
+        // Eager load the profile to get the new fields
         $course->load(['registrations.student.profile']);
 
         $enrolledStudentIds = $course->registrations()->pluck('student_id');
         $availableStudents = User::where('role', 'student')
-                                ->whereNotIn('id', $enrolledStudentIds)
-                                ->get();
-                                
+                                    ->whereNotIn('id', $enrolledStudentIds)
+                                    ->get();
+                                    
         return view('admin.registrations.manage', compact('course', 'availableStudents'));
     }
 

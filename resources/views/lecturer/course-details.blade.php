@@ -34,7 +34,10 @@
                             <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs mr-3">
                                 {{ substr($registration->student->name, 0, 1) }}
                             </div>
-                            <div class="text-sm font-medium text-gray-900">{{ $registration->student->name }}</div>
+                            <div>
+                                <div class="text-sm font-bold text-gray-900">{{ $registration->student->name }}</div>
+                                <div class="text-xs text-blue-600 font-medium">{{ $registration->student->profile->matric_number ?? 'N/A' }}</div>
+                            </div>
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

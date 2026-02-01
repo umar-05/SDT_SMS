@@ -42,6 +42,10 @@
                                 </div>
                                 <div>
                                     <p class="text-sm font-medium text-gray-900">{{ $registration->student->name }}</p>
+                                    <p class="text-xs text-gray-600 font-medium">
+                                        {{ $registration->student->profile->matric_number ?? 'N/A' }} | 
+                                        {{ $registration->student->profile->programme ?? 'N/A' }}
+                                    </p>
                                     <p class="text-xs text-gray-500">{{ $registration->student->email }}</p>
                                 </div>
                             </div>
