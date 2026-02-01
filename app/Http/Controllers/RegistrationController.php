@@ -13,11 +13,17 @@ class RegistrationController extends Controller
      * Requirement 5c: Search course.
      * Requirement 5a: Register courses.
      */
-    public function index(Request $request)
+    public function index()
+    {
+        // Not used for student registration flow currently
+        return abort(404); 
+    }
+
+    public function create(Request $request)
     {
         $query = Course::with('lecturer', 'semester');
 
-        // Search Logic
+        // Search Logic (Requirement 5c)
         if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
@@ -29,12 +35,6 @@ class RegistrationController extends Controller
         $courses = $query->get();
         
         return view('student.register', compact('courses'));
-    }
-
-    public function create()
-    {
-        // Redirect to index as that's where the list logic lives now
-        return redirect()->route('student.register');
     }
 
     public function store(Request $request)
