@@ -30,7 +30,7 @@
                         <p class="text-sm text-gray-500 mb-4">Manage your current enrollments. You can drop pending or approved courses here.</p>
                         
                         <div class="mt-4 border-t border-gray-100 pt-4 max-h-60 overflow-y-auto">
-                            @if(isset($registrations) && $registrations->isNotEmpty())
+                            @if(Auth::user()->role === 'student' && isset($registrations) && $registrations->isNotEmpty())
                                 <ul class="divide-y divide-gray-200">
                                     @foreach($registrations as $reg)
                                         <li class="py-3 flex justify-between items-center">

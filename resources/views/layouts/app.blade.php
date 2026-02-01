@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-gray-50">
 <head>
+    <link rel="stylesheet" href="{{ asset('css/custom-animations.css') }}">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -51,11 +52,18 @@
                          class="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 focus:outline-none"
                          style="display: none;">
                         
-                        <a href="#" 
-                           onclick="open = false; showProfileModal(); return false;" 
-                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            Edit Profile
-                        </a>
+                        @if(Auth::user()->role === 'student')
+                            <a href="#" 
+                            onclick="open = false; showProfileModal(); return false;" 
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Edit Profile
+                            </a>
+                            @elseif(Auth::user()->role === 'lecturer')
+                                <a href="{{ route('lecturer.profile.edit') }}" 
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    My Profile
+                                </a>
+                            @endif
 
                         <div class="border-t border-gray-100"></div>
 

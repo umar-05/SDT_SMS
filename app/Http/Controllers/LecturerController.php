@@ -57,4 +57,36 @@ class LecturerController extends Controller
 
         return view('lecturer.student-details', compact('course', 'student'));
     }
+
+    public function editProfile(Request $request)
+    {
+        return view('lecturer.profile', [
+            'user' => $request->user(),
+            'profile' => $request->user()->profile ?? new \App\Models\Profile(),
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+        
+        $request->validate([
+            'phone_number' => ['required', 'string', 'max:20'],
+            'address' => ['required', 'string', 'max:255'],
+        ]);
+
+        // Update or create the profile linked to the user
+        $user->profile()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'phone_number' => $request->phone_number,
+                'address' => $request->address,
+            ]
+        );
+
+        return back()->with('status', 'profile-updated');
+    }
+
+
+
 }

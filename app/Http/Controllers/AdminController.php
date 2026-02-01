@@ -16,8 +16,36 @@ class AdminController extends Controller
         $totalStudents = User::where('role', 'student')->count();
         $totalLecturers = User::where('role', 'lecturer')->count();
         $totalCourses = Course::count();
+        $pendingRegistrations = Registration::where('status', 'pending')->count();
         
-        return view('admin.dashboard', compact('totalStudents', 'totalLecturers', 'totalCourses'));
+        // Get current semester
+        $currentSemester = Semester::where('is_current', true)->first();
+        
+        // Recent courses with registration counts
+        $recentCourses = Course::with('lecturer')
+            ->withCount(['registrations' => function($query) {
+                $query->where('status', 'approved');
+            }])
+            ->latest()
+            ->take(5)
+            ->get();
+        
+        // Recent pending registrations
+        $recentRegistrations = Registration::with(['student', 'course'])
+            ->where('status', 'pending')
+            ->latest()
+            ->take(5)
+            ->get();
+        
+        return view('admin.dashboard', compact(
+            'totalStudents', 
+            'totalLecturers', 
+            'totalCourses',
+            'pendingRegistrations',
+            'currentSemester',
+            'recentCourses',
+            'recentRegistrations'
+        ));
     }
 
     // --- 2. Course Management ---
@@ -43,6 +71,7 @@ class AdminController extends Controller
             'course_code' => 'required|unique:courses',
             'title' => 'required',
             'description' => 'nullable|string',
+            'credit_hours' => 'nullable|integer|min:1',
             'max_students' => 'required|integer|min:1',
             'lecturer_id' => 'required|exists:users,id',
             'semester_id' => 'required|exists:semesters,id',
@@ -66,6 +95,7 @@ class AdminController extends Controller
             'course_code' => 'required|unique:courses,course_code,'.$course->id,
             'title' => 'required',
             'description' => 'nullable|string',
+            'credit_hours' => 'nullable|integer|min:1',
             'max_students' => 'required|integer|min:1',
             // ADD THESE TWO LINES TO FIX THE ERROR
             'lecturer_id' => 'required|exists:users,id',
@@ -98,9 +128,16 @@ class AdminController extends Controller
     {
         $request->validate(['student_id' => 'required|exists:users,id']);
 
+        // Check if course is full
+        $currentEnrollment = $course->registrations()->where('status', 'approved')->count();
+        
+        // Auto-approve if not full, otherwise set to pending
+        $status = ($currentEnrollment < $course->max_students) ? 'approved' : 'pending';
+
         Registration::create([
             'course_id' => $course->id,
-            'student_id' => $request->student_id
+            'student_id' => $request->student_id,
+            'status' => $status
         ]);
 
         return redirect()->back()->with('success', 'Student added to course.');

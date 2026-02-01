@@ -55,7 +55,9 @@ Route::middleware(['auth', 'role:it_staff'])->prefix('admin')->name('admin.')->g
 Route::middleware(['auth', 'role:lecturer'])->prefix('lecturer')->name('lecturer.')->group(function () {
     // 1. View Assigned Courses
     Route::get('/dashboard', [LecturerController::class, 'dashboard'])->name('dashboard');
-
+    // Dedicated Lecturer Profile Routes
+    Route::get('/profile', [LecturerController::class, 'editProfile'])->name('profile.edit');
+    Route::patch('/profile', [LecturerController::class, 'updateProfile'])->name('profile.update');
     // 2. View Course Details (includes Student List)
     Route::get('/course/{course}', [LecturerController::class, 'showCourse'])->name('course.show');
 
