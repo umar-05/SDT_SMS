@@ -26,14 +26,50 @@
                     <span>Academic Session : 202520261</span>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <span class="text-sm text-gray-600 hidden md:block">{{ Auth::user()->name }}</span>
-                    <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden border border-gray-300">
-                        <svg class="h-12 w-12 text-gray-400 mt-2" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                <div class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">
+                    <button @click="open = ! open" class="flex items-center gap-3 focus:outline-none group">
+                        <span class="text-sm text-gray-600 hidden md:block font-medium group-hover:text-gray-900 transition">{{ Auth::user()->name }}</span>
+                        
+                        <div class="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-300 group-hover:border-blue-400 transition">
+                            <svg class="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </div>
+                        
+                        <svg class="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
+                    </button>
+
+                    <div x-show="open"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="transform opacity-0 scale-95"
+                         x-transition:enter-end="transform opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="transform opacity-100 scale-100"
+                         x-transition:leave-end="transform opacity-0 scale-95"
+                         class="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 focus:outline-none"
+                         style="display: none;">
+                        
+                        <a href="#" 
+                           onclick="open = false; showProfileModal(); return false;" 
+                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            Edit Profile
+                        </a>
+
+                        <div class="border-t border-gray-100"></div>
+
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <a href="{{ route('logout') }}" 
+                               onclick="event.preventDefault(); this.closest('form').submit();" 
+                               class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                Sign Out
+                            </a>
+                        </form>
                     </div>
                 </div>
+
             </div>
         </header>
 
