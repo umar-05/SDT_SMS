@@ -10,7 +10,8 @@ class DatabaseSeeder extends Seeder
      * Seed the application's database.
      */
     public function run(): void
-    {
+    {    
+        \Log::info('===== DATABASE SEEDER STARTED =====');
         // Call the seeders in the correct order
         // 1. Semesters (Courses need semesters)
         $this->call(SemesterSeeder::class);
@@ -22,5 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CourseSeeder::class);
 
         $this->call(SectionSeeder::class);
+
+        \Log::info('===== DATABASE SEEDER COMPLETED =====');
     }
 }
