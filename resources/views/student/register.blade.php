@@ -43,13 +43,19 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($courses as $course)
             @php
-                // Calculate logic for display
-                $enrolledCount = $course->registrations()->where('status', 'approved')->count();
-                $isFull = $enrolledCount >= $course->max_students;
-                $available = $course->max_students - $enrolledCount;
+                // 1. Check if user is already enrolled in ANY section of this course
+                $isRegistered = auth()->user()->registrations()
+                    ->whereHas('section', function($q) use ($course) {
+                        $q->where('course_id', $course->id);
+                    })->exists();
+
+                // 2. Calculate total capacity and enrollment
+                $totalCapacity = $course->sections->sum('capacity');
+                $totalEnrolled = $course->sections->sum('registrations_count');
                 
-                // Check if user is already enrolled (Optimization: could be passed from controller, but this works for small lists)
-                $isRegistered = $course->registrations()->where('student_id', auth()->id())->exists();
+                // 3. Define the variables your HTML is looking for
+                $available = $totalCapacity - $totalEnrolled;
+                $isFull = $available <= 0; 
             @endphp
 
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col h-full hover:border-blue-300 transition-colors">
@@ -81,13 +87,10 @@
                             Already Registered
                         </button>
                     @else
-                        <form action="{{ route('student.register.store') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="course_id" value="{{ $course->id }}">
-                            <button type="submit" class="w-full py-2 px-4 rounded text-sm font-medium text-white transition-colors {{ $isFull ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700' }}">
-                                {{ $isFull ? 'Join Waitlist' : 'Enroll Now' }}
-                            </button>
-                        </form>
+                        <a href="{{ route('student.course.details', $course->id) }}" 
+                        class="block w-full text-center py-2 px-4 rounded text-sm font-medium text-white transition-colors {{ $isFull ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700' }}">
+                            {{ $isFull ? 'Join Waitlist' : 'Enroll Now' }}
+                        </a>
                     @endif
                 </div>
             </div>

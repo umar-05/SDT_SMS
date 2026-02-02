@@ -22,7 +22,6 @@
         
         <div class="border-t border-gray-200">
             <dl>
-                {{-- Academic Record Section (Immutable Data) --}}
                 <div class="bg-blue-50 px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 border-b border-blue-100">
                     <dt class="text-sm font-bold text-blue-600 uppercase tracking-wide">Matric Number</dt>
                     <dd class="mt-1 text-sm font-bold text-gray-900 sm:mt-0 sm:col-span-2">
@@ -36,7 +35,7 @@
                     </dd>
                 </div>
 
-                {{-- Basic Contact Information --}}
+                
                 <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">Email Address</dt>
                     <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $student->email }}</dd>

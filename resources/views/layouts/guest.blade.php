@@ -18,9 +18,12 @@
             <div class="mb-6">
                 <a href="/" class="flex flex-col items-center gap-2">
                     <div class="bg-white p-3 rounded-full shadow-lg">
-                        <x-application-logo class="w-12 h-12 fill-current text-blue-600" />
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-blue-600">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.174L10.72 14.12a1.25 1.25 0 001.28 0l6.46-3.946M3.104 6.703a.75.75 0 011.024-.149l7.15 4.382a.75.75 0 00.744 0l7.15-4.382a.75.75 0 11.798 1.27l-7.15 4.382a2.25 2.25 0 01-2.232 0l-7.15-4.382a.75.75 0 01-.149-1.024z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5h18v5.25a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18.75V13.5z" />
+                        </svg>
                     </div>
-                    <span class="text-white text-2xl font-bold tracking-wide mt-2">Student Portal</span>
+                    <span class="text-white t   ext-2xl font-bold tracking-wide mt-2">Student Portal</span>
                 </a>
             </div>
 

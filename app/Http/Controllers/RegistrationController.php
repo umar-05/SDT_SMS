@@ -5,25 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Registration;
 use App\Models\Course;
+use App\Models\Section;
 use Illuminate\Support\Facades\Auth;
 
 class RegistrationController extends Controller
 {
-    /**
-     * Requirement 5c: Search course.
-     * Requirement 5a: Register courses.
-     */
-    public function index()
-    {
-        // Not used for student registration flow currently
-        return abort(404); 
-    }
-
     public function create(Request $request)
     {
-        $query = Course::with('lecturer', 'semester');
+        // We eager load sections and their registration counts to calculate "spots left"
+        $query = Course::with(['lecturer', 'semester', 'sections.registrations']);
 
-        // Search Logic (Requirement 5c)
         if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
@@ -33,60 +24,47 @@ class RegistrationController extends Controller
         }
 
         $courses = $query->get();
-        
         return view('student.register', compact('courses'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'course_id' => 'required|exists:courses,id',
+            'section_id' => 'required|exists:sections,id',
         ]);
 
-        $course = Course::findOrFail($request->course_id);
+        $section = Section::with('course')->findOrFail($request->section_id);
         $studentId = Auth::id();
 
-        // 1. Duplicate Check
+        // 1. Check if already registered for any section of THIS course
         $existing = Registration::where('student_id', $studentId)
-                                ->where('course_id', $course->id)
-                                ->exists();
+            ->whereHas('section', function($q) use ($section) {
+                $q->where('course_id', $section->course_id);
+            })->exists();
 
         if ($existing) {
-            return redirect()->back()->with('error', 'You are already registered or pending for this course.');
+            return redirect()->back()->with('error', 'You are already registered for this course.');
         }
 
-        // 2. Requirement 8g: Auto-approval Logic
-        $currentApproved = Registration::where('course_id', $course->id)
+        // 2. Capacity Check for the specific section
+        $currentApproved = Registration::where('section_id', $section->id)
                                     ->where('status', 'approved')
                                     ->count();
 
-        if ($currentApproved < $course->max_students) {
+        if ($currentApproved < $section->capacity) {
             $status = 'approved';
-            $msg = 'Registration successful! You are enrolled.';
+            $msg = 'Registration successful! Enrolled in ' . $section->name;
         } else {
             $status = 'pending';
-            $msg = 'Course is full. Your registration is pending approval.';
+            $msg = 'Section is full. Your registration is pending.';
         }
 
         Registration::create([
             'student_id' => $studentId,
-            'course_id' => $course->id,
+            'section_id' => $section->id, // Save section_id, not course_id
             'status' => $status,
         ]);
 
         return redirect()->route('student.register')->with('success', $msg);
-    }
-
-    public function destroy($id)
-    {
-        $registration = Registration::findOrFail($id);
-
-        if ($registration->student_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $registration->delete();
-
-        return redirect()->back()->with('success', 'Registration cancelled.');
     }
 }

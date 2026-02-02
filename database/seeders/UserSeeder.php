@@ -39,8 +39,7 @@ class UserSeeder extends Seeder
             );
         }
 
-        // ================= STUDENTS =================
-        // Defining student data including immutable fields for the profiles table
+
         $students = [
             [
                 'name' => 'John Student',

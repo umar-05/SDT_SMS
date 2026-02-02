@@ -2,15 +2,12 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto">
-    <!-- Page Header with Animation -->
     <div class="mb-8 fade-in">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">My Assigned Courses</h1>
         <p class="text-gray-600">Academic Session 2025/2026</p>
     </div>
 
-    <!-- Stats Overview -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Total Courses Card -->
         <div class="stat-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white fade-in">
             <div class="flex items-center justify-between">
                 <div>
@@ -25,7 +22,6 @@
             </div>
         </div>
 
-        <!-- Current Semester Card -->
         <div class="stat-card bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white fade-in-delay-1">
             <div class="flex items-center justify-between">
                 <div>
@@ -40,7 +36,6 @@
             </div>
         </div>
 
-        <!-- Total Students Card -->
         <div class="stat-card bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white fade-in-delay-2">
             <div class="flex items-center justify-between">
                 <div>

@@ -20,5 +20,7 @@ class DatabaseSeeder extends Seeder
 
         // 3. Courses (Depend on Semesters and Users)
         $this->call(CourseSeeder::class);
+
+        $this->call(SectionSeeder::class);
     }
 }

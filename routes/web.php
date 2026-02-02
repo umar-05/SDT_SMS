@@ -46,6 +46,8 @@ Route::middleware(['auth', 'role:it_staff'])->prefix('admin')->name('admin.')->g
     // 3. Amend Registration (Add/Remove students from courses)
     Route::get('/courses/{course}/registrations', [AdminController::class, 'manageRegistrations'])->name('registrations.manage');
     Route::post('/courses/{course}/registrations', [AdminController::class, 'storeRegistration'])->name('registrations.store');
+    // [FIX] Status Update Route for the Dashboard Approve/Reject buttons
+Route::patch('/registrations/{registration}/status', [AdminController::class, 'updateRegistrationStatus'])->name('registrations.status');
     Route::delete('/registrations/{registration}', [AdminController::class, 'destroyRegistration'])->name('registrations.destroy');
 });
 
@@ -91,8 +93,9 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->group(function (
         ->name('student.courses.index');
 
     // View single course details
+    // Change .show to .course.details to match your Blade file
     Route::get('/courses/{id}', [StudentController::class, 'courseDetails'])
-        ->name('student.courses.show');
+        ->name('student.course.details');
 });
 
 require __DIR__.'/auth.php';

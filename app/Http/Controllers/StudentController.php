@@ -6,38 +6,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Registration;
-use App\Models\Course; // [FIX] Imported Course model
+use App\Models\Course;
 
 class StudentController extends Controller
 {
-    /**
-     * Dashboard: Shows the student's personal registered courses.
-     */
+
     public function index()
     {
         $studentId = Auth::id();
 
-        // 1. Fetch registrations with Course, Semester, and Lecturer
         $registrations = Registration::with(['course.semester', 'course.lecturer'])
                             ->where('student_id', $studentId)
-                            ->get()
+                            ->get() 
                             ->sortByDesc(function ($registration) {
-                                // Sort so latest semesters appear first
                                 return $registration->course->semester->id ?? 0;
                             });
 
-        // 2. Group them by Semester Name (Required for Req 5b)
         $groupedCourses = $registrations->groupBy(function ($registration) {
             return $registration->course->semester->name ?? 'Unknown Semester';
         });
 
-        // 3. Return the view with the CORRECT variable ($groupedCourses)
         return view('student.dashboard', compact('groupedCourses'));
     }
 
-    /**
-     * Search courses (AJAX or direct).
-     */
     public function searchCourses(Request $request)
     {
         $query = $request->get('q');
@@ -124,12 +115,60 @@ class StudentController extends Controller
 
     public function courseDetails($id)
     {
-        $course = Course::with(['lecturer', 'semester'])->findOrFail($id);
+        // Load course with its sections and count of approved registrations for each section
+        $course = Course::with(['lecturer', 'semester', 'sections' => function($query) {
+            $query->withCount(['registrations' => function($q) {
+                $q->where('status', 'approved');
+            }]);
+        }])->findOrFail($id);
         
+        // Check if student is already registered in ANY section of this course
         $isRegistered = Registration::where('student_id', Auth::id())
-            ->where('course_id', $id)
-            ->exists();
+            ->whereHas('section', function($query) use ($id) {
+                $query->where('course_id', $id);
+            })->exists();
         
-        return view('student.course-details', compact('course', 'isRegistered'));
+        // This points to your new view: views/student/showcourse.blade.php
+        return view('student.showcourse', compact('course', 'isRegistered'));
+    }
+
+    public function storeRegistration(Request $request)
+    {
+        $request->validate([
+            'section_id' => 'required|exists:sections,id',
+        ]);
+
+        $studentId = Auth::id();
+        $sectionId = $request->section_id;
+
+        // 1. Fetch section with current approved registration count
+        $section = \App\Models\Section::withCount(['registrations' => function($q) {
+            $q->where('status', 'approved');
+        }])->findOrFail($sectionId);
+
+        // 2. Prevent double registration for the same course
+        $alreadyRegistered = Registration::where('student_id', $studentId)
+            ->whereHas('section', function($q) use ($section) {
+                $q->where('course_id', $section->course_id);
+            })->exists();
+
+        if ($alreadyRegistered) {
+            return back()->with('error', 'You are already registered or have a pending request for this course.');
+        }
+
+        // 3. Strict Capacity Check
+        if ($section->registrations_count >= $section->capacity) {
+            return back()->with('error', 'This section is full. Please select another section.');
+        }
+
+        // 4. Create Registration
+        Registration::create([
+            'student_id' => $studentId,
+            'section_id' => $sectionId,
+            'status' => 'pending',
+        ]);
+
+        return redirect()->route('student.dashboard')
+            ->with('success', 'Registration request for ' . $section->name . ' submitted successfully!');
     }
 }

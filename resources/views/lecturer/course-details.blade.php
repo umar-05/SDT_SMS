@@ -11,8 +11,9 @@
             </div>
             <h2 class="text-2xl font-bold text-gray-800">{{ $course->course_code }}: {{ $course->title }}</h2>
         </div>
+        {{-- Fixed: Calculate total count across all sections --}}
         <div class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium">
-            Total Students: {{ $course->registrations->count() }}
+            Total Students: {{ $course->sections->flatMap->registrations->count() }}
         </div>
     </div>
 
@@ -21,59 +22,68 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Student Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Section</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email Address</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                @forelse($course->registrations as $registration)
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs mr-3">
-                                {{ substr($registration->student->name, 0, 1) }}
-                            </div>
-                            <div>
-                                <div class="text-sm font-bold text-gray-900">{{ $registration->student->name }}</div>
-                                <div class="text-xs text-blue-600 font-medium">{{ $registration->student->profile->matric_number ?? 'N/A' }}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {{ $registration->student->email }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        {{-- [FIX] Dynamic status badges based on database value --}}
-                        @if($registration->status === 'approved')
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Active
-                            </span>
-                        @elseif($registration->status === 'pending')
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                Pending Approval
-                            </span>
-                        @elseif($registration->status === 'waitlist')
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                On Waitlist
-                            </span>
-                        @else
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                {{ ucfirst($registration->status) }}
-                            </span>
-                        @endif
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="{{ route('lecturer.student.show', [$course->id, $registration->student->id]) }}" class="text-blue-600 hover:text-blue-900 font-medium">View Profile</a>
-                    </td>
-                </tr>
-                @empty
+                @php $hasStudents = false; @endphp
+                
+                {{-- Fixed: Loop through sections first, then registrations --}}
+                @foreach($course->sections as $section)
+                    @foreach($section->registrations as $registration)
+                        @php $hasStudents = true; @endphp
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs mr-3">
+                                        {{ substr($registration->student->name, 0, 1) }}
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-bold text-gray-900">{{ $registration->student->name }}</div>
+                                        <div class="text-xs text-blue-600 font-medium">
+                                            {{ $registration->student->profile->matric_number ?? 'N/A' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                <span class="font-medium">{{ $section->name }}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ $registration->student->email }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($registration->status === 'approved')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Active
+                                    </span>
+                                @elseif($registration->status === 'pending')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        Pending Approval
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        {{ ucfirst($registration->status) }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="{{ route('lecturer.student.show', [$course->id, $registration->student->id]) }}" class="text-blue-600 hover:text-blue-900 font-medium">View Profile</a>
+                            </td>
+                        </tr>
+                    @endforeach
+                @endforeach
+
+                @if(!$hasStudents)
                 <tr>
-                    <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
                         No students enrolled in this course yet.
                     </td>
                 </tr>
-                @endforelse
+                @endif
             </tbody>
         </table>
     </div>

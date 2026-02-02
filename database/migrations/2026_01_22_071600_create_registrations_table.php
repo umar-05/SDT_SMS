@@ -14,8 +14,12 @@ return new class extends Migration
         Schema::create('registrations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
-            $table->string('status');
+            
+            // Changed from course_id to section_id to handle specific group capacities
+            $table->foreignId('section_id')->constrained('sections')->onDelete('cascade');
+                
+            // Using string for status as per your original design
+            $table->string('status')->default('pending'); 
             $table->timestamps();
         });
     }

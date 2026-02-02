@@ -3,7 +3,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto">
     <div class="mb-8 fade-in">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ Auth::user()->name }}! 👋</h1>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ Auth::user()->name }}!</h1>
         <p class="text-gray-600">Here's what's happening with your courses today.</p>
     </div>
 
@@ -177,7 +177,7 @@
                                     </div>
                                 </div>
 
-                                <a href="{{ route('student.courses.show', $registration->course->id) }}" 
+                                <a href="{{ route('student.course.details', $registration->course->id) }}" 
                                    class="btn-primary block w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-medium py-2.5 px-4 rounded-lg transition-all transform hover:scale-105">
                                     View Details
                                 </a>
