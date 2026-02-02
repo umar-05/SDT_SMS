@@ -3,15 +3,10 @@ nixPkgs = ['php82', 'php82Packages.composer', 'nodejs', 'mysql-client']
 
 [phases.build]
 cmds = [
-    'composer install --no-interaction --prefer-dist',
-    'npm install',
-    'npm run build',
-    'php artisan config:cache',
-    'php artisan route:cache',
-    'php artisan view:cache'
-    # REMOVED MIGRATE FROM HERE. IT CRASHES BUILDS.
+  'composer install --no-interaction --prefer-dist',
+  'npm install',
+  'npm run build',
+  'php artisan config:cache',
+  'php artisan route:cache',
+  'php artisan view:cache'
 ]
-
-[start]
-# MOVED HERE: This runs when the server starts and connects to Real MySQL
-cmd = "php artisan migrate --force --seed && php artisan serve --host 0.0.0.0 --port $PORT"
