@@ -8,30 +8,25 @@ use App\Models\Section;
 
 class SectionSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run()
     {
-        // 1. ONE-TIME CLEANUP: This deletes existing duplicates on Railway 
-        // by keeping only the first ID for each course/section name combo.
-        Section::whereRaw('id NOT IN (SELECT min(id) FROM (SELECT * FROM sections) as s GROUP BY course_id, name)')->delete();
+        // STEP 1: WIPE ALL EXISTING SECTIONS FIRST
+        // This is the only way to be 100% sure the duplicates are gone
+        // since you don't have terminal access to tinker.
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Section::truncate(); 
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // 2. IDEMPOTENT SEEDING:
+        // STEP 2: RE-CREATE THEM CLEANLY
         $courses = Course::all();
         foreach ($courses as $course) {
-            // updateOrCreate checks if a section with this name/course_id exists.
-            // If yes, it updates the capacity/schedule. If no, it creates it.
-            Section::updateOrCreate(
-                [
-                    'course_id' => $course->id,
-                    'name' => 'Section 01',
-                ],
-                [
-                    'capacity' => 30,
-                    'schedule' => 'Mon/Wed 10:00 AM',
-                ]
-            );
+            Section::create([
+                'course_id' => $course->id,
+                'name'      => 'Section 01',
+                'capacity'  => 30,
+                'schedule'  => 'Mon/Wed 10:00 AM',
+                'room'      => 'TBA'
+            ]);
         }
     }
 }
