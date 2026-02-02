@@ -19,22 +19,26 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // 1. Force HTTPS in production to prevent Mixed Content errors on Railway
+        // 1. Force HTTPS in production
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
             
-            // Auto-seed database on first run
-            if (DB::table('semesters')->count() === 0) {
-                Log::info('Database empty, running seeder...');
-                Artisan::call('db:seed', ['--force' => true]);
-                Log::info('Seeder completed: ' . Artisan::output());
+            // Auto-seed on first run (with safety check)
+            try {
+                if (DB::table('semesters')->count() === 0) {
+                    Log::info('Running seeder...');
+                    Artisan::call('db:seed', ['--force' => true]);
+                    Log::info('Seeder completed');
+                }
+            } catch (\Exception $e) {
+                // Database not ready yet (during build), skip
+                Log::info('Database not ready, skipping seeder check');
             }
         }
 
-        // 2. Share registration data with modals view
+        // 2. Share registration data
         View::composer('layouts.modals', function ($view) {
             if (Auth::check() && Auth::user()->role === 'student') {
-                // FIXED: Querying through section to get course details
                 $registrations = Registration::with('section.course')
                     ->where('student_id', Auth::id())
                     ->whereIn('status', ['approved', 'pending'])
