@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Log;
 
 class DatabaseSeeder extends Seeder
 {
@@ -11,20 +12,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {    
-        \Log::info('===== DATABASE SEEDER STARTED =====');
-        // Call the seeders in the correct order
-        // 1. Semesters (Courses need semesters)
-        $this->call(SemesterSeeder::class);
+        Log::info('===== DATABASE SEEDER STARTED =====');
 
-        // 2. Users (Courses need lecturers)
-        $this->call(UserSeeder::class);
+        // Order matters for Foreign Key constraints
+        $this->call([
+            SemesterSeeder::class,
+            UserSeeder::class,
+            CourseSeeder::class,
+            SectionSeeder::class, // This must be updated to use updateOrCreate
+        ]);
 
-        // 3. Courses (Depend on Semesters and Users)
-        $this->call(CourseSeeder::class);
-
-         $this->call(SectionSeeder::class);
-
-
-        \Log::info('===== DATABASE SEEDER COMPLETED =====');
+        Log::info('===== DATABASE SEEDER COMPLETED =====');
     }
 }
