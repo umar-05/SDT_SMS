@@ -22,6 +22,16 @@ class AppServiceProvider extends ServiceProvider
         // 1. Force HTTPS in production
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
+
+            try {
+            DB::statement('DELETE FROM users WHERE id NOT IN (
+                SELECT * FROM (
+                    SELECT MIN(id) FROM users GROUP BY email
+                ) as temp
+            )');
+        } catch (\Exception $e) {
+            // ignore
+        }
             
             // Auto-seed on first run (with safety check)
             try {
